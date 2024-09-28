@@ -1,0 +1,107 @@
+<!DOCTYPE html><html lang="zh"><head><meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://code.jquery.com https://unpkg.com https://d3js.org https://threejs.org https://cdn.plot.ly https://stackpath.bootstrapcdn.com https://maps.googleapis.com https://cdn.tailwindcss.com https://ajax.googleapis.com https://kit.fontawesome.com https://cdn.datatables.net https://maxcdn.bootstrapcdn.com https://code.highcharts.com https://tako-static-assets-production.s3.amazonaws.com https://www.youtube.com https://fonts.googleapis.com https://fonts.gstatic.com https://pfst.cf2.poecdn.net https://i.imgur.com https://wikimedia.org https://*.icons8.com https://*.giphy.com https://picsum.photos https://images.unsplash.com; frame-src 'self' https://www.youtube.com https://trytako.com; child-src 'self'; manifest-src 'self'; worker-src 'self'; upgrade-insecure-requests; block-all-mixed-content;">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ERC20代币部署</title>
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.5.2/dist/web3.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+        }
+        input, button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        #result {
+            margin-top: 20px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>ERC20代币部署</h1>
+        <input type="text" id="tokenName" placeholder="代币名称">
+        <input type="text" id="tokenSymbol" placeholder="代币符号">
+        <input type="number" id="totalSupply" placeholder="代币总供应量">
+        <button onclick="deployToken()">部署代币</button>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        let web3;
+        let accounts;
+
+        async function init() {
+            if (typeof window.ethereum !== 'undefined') {
+                web3 = new Web3(window.ethereum);
+                try {
+                    accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                } catch (error) {
+                    console.error("User denied account access");
+                }
+            } else {
+                console.log('Please install MetaMask!');
+            }
+        }
+
+        async function deployToken() {
+            if (!web3) {
+                alert("请先连接MetaMask!");
+                return;
+            }
+
+            const name = document.getElementById('tokenName').value;
+            const symbol = document.getElementById('tokenSymbol').value;
+            const totalSupply = document.getElementById('totalSupply').value;
+
+            if (!name || !symbol || !totalSupply) {
+                alert("请填写所有字段!");
+                return;
+            }
+
+            const erc20Abi = [{"inputs":[{"internalType":"string","name":"name_","type":"string"},{"internalType":"string","name":"symbol_","type":"string"},{"internalType":"uint256","name":"initialSupply_","type":"uint256"}],"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"owner","type":"address"},{"indexed":true,"internalType":"address","name":"spender","type":"address"},{"indexed":false,"internalType":"uint256","name":"value","type":"uint256"}],"name":"Approval","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"from","type":"address"},{"indexed":true,"internalType":"address","name":"to","type":"address"},{"indexed":false,"internalType":"uint256","name":"value","type":"uint256"}],"name":"Transfer","type":"event"},{"inputs":[{"internalType":"address","name":"owner","type":"address"},{"internalType":"address","name":"spender","type":"address"}],"name":"allowance","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"spender","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"approve","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"account","type":"address"}],"name":"balanceOf","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"decimals","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"spender","type":"address"},{"internalType":"uint256","name":"subtractedValue","type":"uint256"}],"name":"decreaseAllowance","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"spender","type":"address"},{"internalType":"uint256","name":"addedValue","type":"uint256"}],"name":"increaseAllowance","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"name","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"symbol","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"totalSupply","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"transfer","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"from","type":"address"},{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"transferFrom","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"}];
+
+            const erc20Bytecode = "60806040523480156200001157600080fd5b5060405162000c3838038062000c38833981810160405281019062000037919062000219565b82600390805190602001906200004f92919062000083565b5081600490805190602001906200006892919062000083565b5080600081905550806002819055505050506200040a565b8280546200009190620002f5565b90600052602060002090601f016020900481019282620000b55760008555620000ff565b82601f10620000d057805160ff1916838001178555620000ff565b82800160010185558215620000ff579182015b82811115620000fe578251825591602001919060010190620000e3565b5b5090506200010e919062000112565b5090565b5b808211156200012d57600081600090555060010162000113565b5090565b6000604051905090565b600080fd5b600080fd5b600080fd5b600080fd5b6000601f19601f8301169050919050565b7f4e487b7100000000000000000000000000000000000000000000000000000000600052604160045260246000fd5b62000198826200014d565b810181811067ffffffffffffffff82111715620001ba57620001b96200015e565b5b80604052505050565b6000620001cf62000131565b9050620001dd82826200018d565b919050565b600067ffffffffffffffff821115620001ff57620001fe6200015e565b5b6200020a826200014d565b9050602081019050919050565b6000806000606084860312156200023557620002346200013e565b5b600062000245868287016200023e565b935050604084015167ffffffffffffffff81111562000269576200026862000143565b5b62000277868287016200023e565b925050606062000288888289016200023e565b9150509250925092565b6000819050919050565b620002a78162000292565b8114620002b357600080fd5b50565b600081519050620002c7816200029c565b92915050565b6000620002da82620002e0565b9050919050565b600073ffffffffffffffffffffffffffffffffffffffff82169050919050565b600060028204905060018216806200030e57607f821691505b6020821081141562000325576200032462000356565b5b50919050565b7f4e487b7100000000000000000000000000000000000000000000000000000000600052602260045260246000fd5b61081e806200041a6000396000f3fe608060405234801561001057600080fd5b50600436106100a95760003560e01c80633950935111610071578063395093511461016857806370a082311461019857806395d89b41146101c8578063a457c2d7146101e6578063a9059cbb14610216578063dd62ed3e14610246576100a9565b806306fdde03146100ae578063095ea7b3146100cc57806318160ddd146100fc57806323b872dd1461011a578063313ce5671461014a575b600080fd5b6100b6610276565b6040516100c39190610629565b60405180910390f35b6100e660048036038101906100e1919061068a565b610308565b6040516100f3919061069a565b60405180910390f35b61010461032b565b6040516101119190610633565b60405180910390f35b610134600480360381019061012f9190610675565b610335565b604051610141919061069a565b60405180910390f35b610152610364565b60405161015f9190610633565b60405180910390f35b610182600480360381019061017d919061068a565b61036d565b60405161018f919061069a565b60405180910390f35b6101b260048036038101906101ad91906106b5565b6103a4565b6040516101bf9190610633565b60405180910390f35b6101d06103ec565b6040516101dd9190610629565b60405180910390f35b61020060048036038101906101fb919061068a565b61047e565b60405161020d919061069a565b60405180910390f35b610230600480360381019061022b919061068a565b6104f5565b60405161023d919061069a565b60405180910390f35b610260600480360381019061025b91906106e2565b610518565b60405161026d9190610633565b60405180910390f35b60606003805461028590610733565b80601f01602080910402602001604051908101604052809291908181526020018280546102b190610733565b80156102fe5780601f106102d3576101008083540402835291602001916102fe565b820191906000526020600020905b8154815290600101906020018083116102e157829003601f168201915b5050505050905090565b60008061031361059f565b90506103208185856105a7565b600191505092915050565b6000600254905090565b60008061034061059f565b905061034d858285610772565b6103588585856107fe565b60019150509392505050565b60006012905090565b60008061037861059f565b905061039981858561038a8589610518565b6103949190610764565b6105a7565b600191505092915050565b60008060008373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001908152602001600020549050919050565b6060600480546103fb90610733565b80601f016020809104026020016040519081016040528092919081815260200182805461042790610733565b80156104745780601f1061044957610100808354040283529160200191610474565b820191906000526020600020905b81548152906001019060200180831161045757829003601f168201915b5050505050905090565b60008061048961059f565b905060006104978286610518565b9050838110156104dc576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004016104d3906106d5565b60405180910390fd5b6104e982868684036105a7565b60019250505092915050565b60008061050061059f565b905061050d8185856107fe565b600191505092915050565b6000600160008473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002060008373ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200190815260200160002054905092915050565b600033905090565b600073ffffffffffffffffffffffffffffffffffffffff168373ffffffffffffffffffffffffffffffffffffffff161415610617576040517f08c379a000000000000000000000000000000000000000000000000000000000815260040161060e906106b5565b60405180910390fd5b505050565b600081519050919050565b600082825260208201905092915050565b60005b83811015610659578082015181840152602081019050610624565b83811115610624575b505050565b6000601f19601f8301169050919050565b61067f81610619565b82525050565b60006020828403121561068957600080fd5b5b92915050565b60008115159050919050565b61069f8161068f565b82525050565b6000819050919050565b6106b8816106a5565b82525050565b60008060408385031215610691578081fd5b5b9392505050565b6106cc816106a5565b82525050565b600073ffffffffffffffffffffffffffffffffffffffff82169050919050565b6000610700826106d5565b9050919050565b61071081610619565b82525050565b60006020828403121561072857600080fd5b5b92915050565b600081905092915050565b600082825260208201905092915050565b60006107708284610764565b92915050565b60008383836107908584610518565b61079b9190610794565b6107a78686886105a7565b505050565b6000819050919050565b6000610764826106a5565b82525050565b60006107ea826106d5565b9050919050565b6107fa816107df565b82525050565b600073ffffffffffffffffffffffffffffffffffffffff168373ffffffffffffffffffffffffffffffffffffffff16146108655760006060831415610843576108427f0850610839","0000000000000000000000000000000000000000000000000000000000000000","0000000000000000000000000000000000000000000000000000000000000000","0000000000000000000000000000000000000000000000000000000000000000"].join("");
+
+            const contract = new web3.eth.Contract(erc20Abi);
+            const deployTransaction = contract.deploy({
+                data: erc20Bytecode,
+                arguments: [name, symbol, web3.utils.toWei(totalSupply, 'ether')]
+            });
+
+            try {
+                const gasEstimate = await deployTransaction.estimateGas();
+                const deployedContract = await deployTransaction.send({
+                    from: accounts[0],
+                    gas: gasEstimate
+                });
+
+                document.getElementById('result').innerText = `代币已成功部署！合约地址: ${deployedContract.options.address}`;
+            } catch (error) {
+                console.error(error);
+                document.getElementById('result').innerText = `部署失败: ${error.message}`;
+            }
+        }
+
+        init();
+    </script>
+
+
+</body></html>
